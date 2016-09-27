@@ -7,26 +7,41 @@ const {
   computed,
   get,
   set,
+  A,
 } = Ember;
 
 export default Mixin.create({
   hoverTriangulation: service(),
 
-  init() {
-    this._super(...arguments);
+  anchorSelector: null,
 
+  init(...args) {
+    this._super(args);
+
+    this.onMouseEnter = this.onMouseEnter.bind(this);
+    this.onMouseLeave = this.onMouseLeave.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
   },
 
-  mouseEnter() {
-    const currentElement = get(this, 'element');
+  didInsertElement(...args) {
+    this._super(args);
+
+    const anchorTags = this.$().find(get(this, 'anchorSelector'));
+
+    anchorTags.each((index, item) => {
+      this.$(item).on('mouseenter', this.onMouseEnter);
+    });
+  },
+
+  onMouseEnter() {
+    const baseElement = get(this, 'baseElement');
 
     if (!get(this, 'isMovingTowardsTarget') || !get(this, 'hoverTriangulation.activeElement')) {
-      set(this, 'hoverTriangulation.activeElement', currentElement);
+      set(this, 'hoverTriangulation.activeElement', baseElement);
       this.activateElement();
     }
 
-    currentElement.addEventListener('mousemove', this.onMouseMove);
+    baseElement.addEventListener('mousemove', this.onMouseMove);
   },
 
   mouseLeave() {
@@ -95,28 +110,28 @@ export default Mixin.create({
     '$subElement',
     'subElementDirection',
     function () {
-    const { mouseLocations } = this.get('hoverTriangulation');
+      const { mouseLocations } = this.get('hoverTriangulation');
 
-    if (mouseLocations.length === 0) {
-      return true;
-    }
+      if (mouseLocations.length === 0) {
+        return true;
+      }
 
-    const currentMouseLocation = mouseLocations[mouseLocations.length - 1];
-    const previousMouseLocation = mouseLocations[0] ? mouseLocations[0] : currentMouseLocation;
-    const { decreasingCorner, increasingCorner } = this.get('slopeDirections');
-    const previousDistanceA = this.getDistance(previousMouseLocation, decreasingCorner);
-    const previousDistanceB = this.getDistance(previousMouseLocation, increasingCorner);
-    const distanceA = this.getDistance(currentMouseLocation, decreasingCorner);
-    const distanceB = this.getDistance(currentMouseLocation, increasingCorner);
+      const currentMouseLocation = mouseLocations[mouseLocations.length - 1];
+      const previousMouseLocation = mouseLocations[0] ? mouseLocations[0] : currentMouseLocation;
+      const { decreasingCorner, increasingCorner } = this.get('slopeDirections');
+      const previousDistanceA = this.getDistance(previousMouseLocation, decreasingCorner);
+      const previousDistanceB = this.getDistance(previousMouseLocation, increasingCorner);
+      const distanceA = this.getDistance(currentMouseLocation, decreasingCorner);
+      const distanceB = this.getDistance(currentMouseLocation, increasingCorner);
 
-    if (distanceA < previousDistanceA || distanceB < previousDistanceB) {
-      const slopeOfMouseMovement = this.getSlope(previousMouseLocation, currentMouseLocation);
-      const yOfDestination = slopeOfMouseMovement * (decreasingCorner.x - currentMouseLocation.x) + currentMouseLocation.y;
+      if (distanceA < previousDistanceA || distanceB < previousDistanceB) {
+        const slopeOfMouseMovement = this.getSlope(previousMouseLocation, currentMouseLocation);
+        const yOfDestination = slopeOfMouseMovement * (decreasingCorner.x - currentMouseLocation.x) + currentMouseLocation.y;
 
-      console.log(`Checking if ${yOfDestination} is between ${decreasingCorner.y - 50} and ${increasingCorner.y + 50}`);
-      return yOfDestination >= decreasingCorner.y - DEFAULT_TOLERANCE && yOfDestination <= increasingCorner.y + DEFAULT_TOLERANCE;
-    }
-  }).volatile(),
+        console.log(`Checking if ${yOfDestination} is between ${decreasingCorner.y - 50} and ${increasingCorner.y + 50}`);
+        return yOfDestination >= decreasingCorner.y - DEFAULT_TOLERANCE && yOfDestination <= increasingCorner.y + DEFAULT_TOLERANCE;
+      }
+    }).volatile(),
 
   subElementOffsets: computed('$subElement', function () {
     const subElement = get(this, '$subElement');
@@ -141,7 +156,7 @@ export default Mixin.create({
     return { upperLeft, upperRight, lowerLeft, lowerRight };
   }),
 
-  getDistance(a=0, b=0) {
+  getDistance(a = 0, b = 0) {
     const { pow, sqrt } = window.Math;
 
     return sqrt(pow((b.y - a.y), 2) + pow((b.x - a.x), 2));
