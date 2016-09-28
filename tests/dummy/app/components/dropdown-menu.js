@@ -11,6 +11,8 @@ export default zfDropdownMenu.extend(HoverAimable, {
 
   targetElementDirection: 'right',
 
+  aimTolerance: 50,
+
   activateElement(targetElement) {
     this.$(targetElement).addClass('open');
   },

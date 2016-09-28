@@ -21,7 +21,7 @@ function getSlope(a, b) {
 export default Mixin.create({
   hoverAim: service(),
 
-  aimTolerance: 50,
+  aimTolerance: 100,
   anchorSelector: null,
   targetSubElementSelector: null,
   targetElementDirection: null,
