@@ -60,28 +60,30 @@ export default Mixin.create({
   },
 
   onMouseEnter(event) {
-    const target = event.delegateTarget || event.currentTarget;
+    const eventTarget = event.delegateTarget || event.currentTarget;
 
     if (!get(this, 'isMovingTowardsTarget')) {
       if (!get(this, 'hoverAim.activeElement')) {
-        set(this, 'hoverAim.activeElement', target);
+        set(this, 'hoverAim.activeElement', eventTarget);
       }
 
-      this.activateElement(target);
+      this.activateElement(eventTarget);
     }
 
-    this.$(target).on('mousemove', this.onMouseMove);
+    this.$(eventTarget).on('mousemove', this.onMouseMove);
   },
 
   onMouseLeave(event) {
-    const target = event.delegateTarget || event.currentTarget;
+    const eventTarget = event.delegateTarget || event.currentTarget;
 
-    this.$(target).off('mousemove', this.onMouseMove);
+    this.$(eventTarget).off('mousemove', this.onMouseMove);
 
-    if (target === get(this, 'hoverAim.activeElement') && !get(this, 'isMovingTowardsTarget')) {
+    if (!get(this, 'isMovingTowardsTarget')) {
       if (this.deactivateElement) {
-        this.deactivateElement();
+        this.deactivateElement(eventTarget);
       }
+
+      set(this, 'hoverAim.activeElement', eventTarget);
     }
   },
 
@@ -92,15 +94,15 @@ export default Mixin.create({
     });
 
     if (!get(this, 'isMovingTowardsTarget')) {
-      const target = event.delegateTarget || event.currentTarget;
+      const eventTarget = event.delegateTarget || event.currentTarget;
 
-      if (target !== get(this, 'hoverAim.activeElement')) {
+      if (eventTarget !== get(this, 'hoverAim.activeElement')) {
         if (this.deactivateElement) {
           this.deactivateElement(get(this, 'hoverAim.activeElement'));
         }
 
-        set(this, 'hoverAim.activeElement', target);
-        this.activateElement(target);
+        set(this, 'hoverAim.activeElement', eventTarget);
+        this.activateElement(eventTarget);
       }
     }
   },
