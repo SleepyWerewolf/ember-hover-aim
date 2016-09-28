@@ -12,8 +12,8 @@
 <div class="row">
   <div class="small-4 large-expand columns">
     <h2>Dropdown Menu</h2>
-    <button class="button" data-toggle="example-dropdown">Toggle Dropdown</button>
-    {{#zf-dropdown id="example-dropdown"}}
+    <button class="button" data-toggle="example-dropdown">Hover to Show Dropdown</button>
+    {{#zf-dropdown id="example-dropdown" hover=true hoverDelay=0 hoverPane=true closeOnClick=true}}
       Example form in a dropdown.
       {{#dropdown-menu class="vertical" closingTime=0 disableHover=true}}
         <li>

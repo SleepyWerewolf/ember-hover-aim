@@ -1,6 +1,5 @@
 import Ember from 'ember';
 
-const DEFAULT_TOLERANCE = 100;
 const {
   Mixin,
   inject: { service },
@@ -9,10 +8,23 @@ const {
   set,
 } = Ember;
 
+function getDistance(a = 0, b = 0) {
+  const { pow, sqrt } = window.Math;
+
+  return sqrt(pow((b.y - a.y), 2) + pow((b.x - a.x), 2));
+}
+
+function getSlope(a, b) {
+  return (b.y - a.y) / (b.x - a.x);
+}
+
 export default Mixin.create({
   hoverAim: service(),
 
+  aimTolerance: 50,
   anchorSelector: null,
+  targetSubElementSelector: null,
+  targetElementDirection: null,
 
   init(...args) {
     this._super(args);
@@ -65,6 +77,12 @@ export default Mixin.create({
     const target = event.delegateTarget || event.currentTarget;
 
     this.$(target).off('mousemove', this.onMouseMove);
+
+    if (target === get(this, 'hoverAim.activeElement') && !get(this, 'isMovingTowardsTarget')) {
+      if (this.deactivateElement) {
+        this.deactivateElement();
+      }
+    }
   },
 
   onMouseMove(event) {
@@ -134,17 +152,18 @@ export default Mixin.create({
       const currentMouseLocation = mouseLocations[mouseLocations.length - 1];
       const previousMouseLocation = mouseLocations[0] ? mouseLocations[0] : currentMouseLocation;
       const { decreasingCorner, increasingCorner } = this.get('slopeDirections');
-      const previousDistanceA = this.getDistance(previousMouseLocation, decreasingCorner);
-      const previousDistanceB = this.getDistance(previousMouseLocation, increasingCorner);
-      const distanceA = this.getDistance(currentMouseLocation, decreasingCorner);
-      const distanceB = this.getDistance(currentMouseLocation, increasingCorner);
+      const previousDistanceA = getDistance(previousMouseLocation, decreasingCorner);
+      const previousDistanceB = getDistance(previousMouseLocation, increasingCorner);
+      const distanceA = getDistance(currentMouseLocation, decreasingCorner);
+      const distanceB = getDistance(currentMouseLocation, increasingCorner);
 
       if (distanceA < previousDistanceA || distanceB < previousDistanceB) {
-        const slopeOfMouseMovement = this.getSlope(previousMouseLocation, currentMouseLocation);
+        const slopeOfMouseMovement = getSlope(previousMouseLocation, currentMouseLocation);
         const yOfDestination = slopeOfMouseMovement * (decreasingCorner.x - currentMouseLocation.x) + currentMouseLocation.y;
+        const aimTolerance = get(this, 'aimTolerance');
 
         console.log(`Checking if ${yOfDestination} is between ${decreasingCorner.y - 50} and ${increasingCorner.y + 50}`);
-        return yOfDestination >= decreasingCorner.y - DEFAULT_TOLERANCE && yOfDestination <= increasingCorner.y + DEFAULT_TOLERANCE;
+        return yOfDestination >= decreasingCorner.y - aimTolerance && yOfDestination <= increasingCorner.y + aimTolerance;
       }
     }).volatile(),
 
@@ -172,14 +191,4 @@ export default Mixin.create({
 
     return { upperLeft, upperRight, lowerLeft, lowerRight };
   }),
-
-  getDistance(a = 0, b = 0) {
-    const { pow, sqrt } = window.Math;
-
-    return sqrt(pow((b.y - a.y), 2) + pow((b.x - a.x), 2));
-  },
-
-  getSlope(a, b) {
-    return (b.y - a.y) / (b.x - a.x);
-  },
 });

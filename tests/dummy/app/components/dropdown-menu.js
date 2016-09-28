@@ -3,7 +3,7 @@ import zfDropdownMenu from 'ember-cli-foundation-6-sass/components/zf-dropdown-m
 import HoverAimable from 'ember-hover-aim/mixins/hover-aim';
 
 export default zfDropdownMenu.extend(HoverAimable, {
-  classNames: ['my-dropdown-menu'],
+  classNames: ['test-dropdown-menu'],
 
   anchorSelector: '>li',
 
