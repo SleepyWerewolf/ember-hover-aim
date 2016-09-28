@@ -57,5 +57,8 @@
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
+  },
+  "scripts": {
+    "deploy": "ember github-pages:commit --message \"Deploy gh-pages from commit $(git rev-parse HEAD)\"; git push; git checkout -"
   }
 }
