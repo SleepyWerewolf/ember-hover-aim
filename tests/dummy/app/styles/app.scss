@@ -1,0 +1,8 @@
+@import 'foundation';
+@include foundation-everything;
+
+.is-dropdown-submenu-parent.open {
+  .is-dropdown-submenu {
+    display: block;
+  }
+}

@@ -7,11 +7,10 @@ const {
   computed,
   get,
   set,
-  A,
 } = Ember;
 
 export default Mixin.create({
-  hoverTriangulation: service(),
+  hoverAim: service(),
 
   anchorSelector: null,
 
@@ -26,54 +25,69 @@ export default Mixin.create({
   didInsertElement(...args) {
     this._super(args);
 
-    const anchorTags = this.$().find(get(this, 'anchorSelector'));
+    const anchors = this.$(get(this, 'anchorSelector'));
 
-    anchorTags.each((index, item) => {
-      this.$(item).on('mouseenter', this.onMouseEnter);
+    set(this, 'anchors', anchors);
+    anchors.each((index, item) => {
+      const $item = this.$(item);
+
+      $item.on('mouseenter', this.onMouseEnter);
+      $item.on('mouseleave', this.onMouseLeave);
     });
   },
 
-  onMouseEnter() {
-    const baseElement = get(this, 'baseElement');
+  willDestroyElement(...args) {
+    this._super(args);
 
-    if (!get(this, 'isMovingTowardsTarget') || !get(this, 'hoverTriangulation.activeElement')) {
-      set(this, 'hoverTriangulation.activeElement', baseElement);
-      this.activateElement();
-    }
+    this.$(get(this, 'anchors')).each((index, item) => {
+      const $item = this.$(item);
 
-    baseElement.addEventListener('mousemove', this.onMouseMove);
+      $item.off('mouseenter', this.onMouseEnter);
+      $item.off('mouseleave', this.onMouseLeave);
+    });
   },
 
-  mouseLeave() {
-    console.log('\n\n\nDeactivating element\n\n\n');
-    get(this, 'element').removeEventListener('mousemove', this.onMouseMove);
+  onMouseEnter(event) {
+    const target = event.delegateTarget || event.currentTarget;
+
+    if (!get(this, 'isMovingTowardsTarget')) {
+      if (!get(this, 'hoverAim.activeElement')) {
+        set(this, 'hoverAim.activeElement', target);
+      }
+
+      this.activateElement(target);
+    }
+
+    this.$(target).on('mousemove', this.onMouseMove);
+  },
+
+  onMouseLeave(event) {
+    const target = event.delegateTarget || event.currentTarget;
+
+    this.$(target).off('mousemove', this.onMouseMove);
   },
 
   onMouseMove(event) {
-    get(this, 'hoverTriangulation').addMouseEvent({
+    get(this, 'hoverAim').addMouseEvent({
       x: event.pageX,
       y: event.pageY,
     });
 
     if (!get(this, 'isMovingTowardsTarget')) {
-      console.log('\n\n\nNot moving towards target\n\n\n');
+      const target = event.delegateTarget || event.currentTarget;
 
-      if (get(this, 'isActiveElement')) {
-        if (this.deactivate) {
-          this.deactivate();
+      if (target !== get(this, 'hoverAim.activeElement')) {
+        if (this.deactivateElement) {
+          this.deactivateElement(get(this, 'hoverAim.activeElement'));
         }
-      } else {
-        set(this, 'hoverTriangulation.activeElement', get(this, 'element'));
-        this.activateElement();
+
+        set(this, 'hoverAim.activeElement', target);
+        this.activateElement(target);
       }
-    } else {
-      console.log('\n\n\nMoving towards target\n\n\n');
     }
   },
 
-  isActiveElement: computed.equal('element', 'hoverTriangulation.activeElement'),
-
-  slopeDirections: computed('subElementDirection', 'subElementOffsets', function () {
+  slopeDirections: computed('targetElementDirection', 'targetElementOffsets', function () {
     let decreasingCorner;
     let increasingCorner;
     const {
@@ -81,9 +95,9 @@ export default Mixin.create({
       upperRight,
       lowerLeft,
       lowerRight,
-    } = get(this, 'subElementOffsets');
+    } = get(this, 'targetElementOffsets');
 
-    switch (this.get('subElementDirection')) {
+    switch (get(this, 'targetElementDirection')) {
       case 'left':
         decreasingCorner = lowerLeft;
         increasingCorner = upperLeft;
@@ -106,14 +120,15 @@ export default Mixin.create({
   }),
 
   isMovingTowardsTarget: computed(
-    'hoverTriangulation.mouseLocations',
-    '$subElement',
-    'subElementDirection',
+    'hoverAim.mouseLocations',
+    '$targetElement',
+    'targetElementDirection',
+    'hoverAim.activeElement',
     function () {
-      const { mouseLocations } = this.get('hoverTriangulation');
+      const { mouseLocations } = this.get('hoverAim');
 
-      if (mouseLocations.length === 0) {
-        return true;
+      if (!Ember.isPresent(get(this, 'hoverAim.activeElement')) || !Ember.isPresent(mouseLocations)) {
+        return false;
       }
 
       const currentMouseLocation = mouseLocations[mouseLocations.length - 1];
@@ -133,23 +148,25 @@ export default Mixin.create({
       }
     }).volatile(),
 
-  subElementOffsets: computed('$subElement', function () {
-    const subElement = get(this, '$subElement');
-    const subElementOffset = subElement.offset();
+  targetElementOffsets: computed('targetSubElementSelector', function () {
+    const { activeElement } = get(this, 'hoverAim');
+    const targetSubElementSelector = get(this, 'targetSubElementSelector');
+    const targetSubElement = Ember.$(activeElement).find(targetSubElementSelector);
+    const targetSubElementOffset = targetSubElement.offset();
     const upperLeft = {
-      x: subElementOffset.left,
-      y: subElementOffset.top,
+      x: targetSubElementOffset.left,
+      y: targetSubElementOffset.top,
     };
     const upperRight = {
-      x: subElementOffset.left + subElement.outerWidth(),
+      x: targetSubElementOffset.left + targetSubElement.outerWidth(),
       y: upperLeft.y,
     };
     const lowerLeft = {
-      x: subElementOffset.left,
-      y: subElementOffset.top + subElement.outerHeight(),
+      x: targetSubElementOffset.left,
+      y: targetSubElementOffset.top + targetSubElement.outerHeight(),
     };
     const lowerRight = {
-      x: subElementOffset.left + subElement.outerWidth(),
+      x: targetSubElementOffset.left + targetSubElement.outerWidth(),
       y: lowerLeft.y,
     };
 

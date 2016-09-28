@@ -6,4 +6,16 @@ export default zfDropdownMenu.extend(HoverAimable, {
   classNames: ['my-dropdown-menu'],
 
   anchorSelector: '>li',
+
+  targetSubElementSelector: '.submenu.is-dropdown-submenu',
+
+  targetElementDirection: 'right',
+
+  activateElement(targetElement) {
+    this.$(targetElement).addClass('open');
+  },
+
+  deactivateElement(targetElement) {
+    this.$(targetElement).removeClass('open');
+  },
 });
