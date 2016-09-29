@@ -108,8 +108,8 @@ export default Mixin.create({
   },
 
   slopeDirections: computed('targetElementDirection', 'targetElementOffsets', function () {
-    let decreasingCorner;
-    let increasingCorner;
+    let primaryCorner;
+    let secondaryCorner;
     const {
       upperLeft,
       upperRight,
@@ -119,24 +119,24 @@ export default Mixin.create({
 
     switch (get(this, 'targetElementDirection')) {
       case 'left':
-        decreasingCorner = lowerLeft;
-        increasingCorner = upperLeft;
+        primaryCorner = lowerLeft;
+        secondaryCorner = upperLeft;
         break;
       case 'bottom':
-        decreasingCorner = lowerRight;
-        increasingCorner = lowerLeft;
+        primaryCorner = lowerRight;
+        secondaryCorner = lowerLeft;
         break;
       case 'top':
-        decreasingCorner = upperLeft;
-        increasingCorner = upperRight;
+        primaryCorner = upperLeft;
+        secondaryCorner = upperRight;
         break;
       default:
-        decreasingCorner = upperLeft;
-        increasingCorner = lowerLeft;
+        primaryCorner = upperLeft;
+        secondaryCorner = lowerLeft;
         break;
     }
 
-    return { decreasingCorner, increasingCorner };
+    return { primaryCorner, secondaryCorner };
   }),
 
   isMovingTowardsTarget: computed(
@@ -153,19 +153,18 @@ export default Mixin.create({
 
       const currentMouseLocation = mouseLocations[mouseLocations.length - 1];
       const previousMouseLocation = mouseLocations[0] ? mouseLocations[0] : currentMouseLocation;
-      const { decreasingCorner, increasingCorner } = this.get('slopeDirections');
-      const previousDistanceA = getDistance(previousMouseLocation, decreasingCorner);
-      const previousDistanceB = getDistance(previousMouseLocation, increasingCorner);
-      const distanceA = getDistance(currentMouseLocation, decreasingCorner);
-      const distanceB = getDistance(currentMouseLocation, increasingCorner);
+      const { primaryCorner, secondaryCorner } = this.get('slopeDirections');
+      const previousDistanceToPrimaryCorner = getDistance(previousMouseLocation, primaryCorner);
+      const previousDistanceToSecondaryCorner = getDistance(previousMouseLocation, secondaryCorner);
+      const distanceToPrimaryCorner = getDistance(currentMouseLocation, primaryCorner);
+      const distanceToSecondaryCorner = getDistance(currentMouseLocation, secondaryCorner);
 
-      if (distanceA < previousDistanceA || distanceB < previousDistanceB) {
+      if (distanceToPrimaryCorner < previousDistanceToPrimaryCorner || distanceToSecondaryCorner < previousDistanceToSecondaryCorner) {
         const slopeOfMouseMovement = getSlope(previousMouseLocation, currentMouseLocation);
-        const yOfDestination = slopeOfMouseMovement * (decreasingCorner.x - currentMouseLocation.x) + currentMouseLocation.y;
+        const yInterceptOfTarget = slopeOfMouseMovement * (primaryCorner.x - currentMouseLocation.x) + currentMouseLocation.y;
         const aimTolerance = get(this, 'aimTolerance');
 
-        console.log(`Checking if ${yOfDestination} is between ${decreasingCorner.y - 50} and ${increasingCorner.y + 50}`);
-        return yOfDestination >= decreasingCorner.y - aimTolerance && yOfDestination <= increasingCorner.y + aimTolerance;
+        return yInterceptOfTarget >= primaryCorner.y - aimTolerance && yInterceptOfTarget <= secondaryCorner.y + aimTolerance;
       }
     }).volatile(),
 
