@@ -1,3 +1,7 @@
+<a href="https://github.com/SleepyWerewolf/ember-hover-aim">
+  <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png">
+</a>
+
 <!-- Title Bar -->
 <div class="title-bar">
   <div class="title-bar-left">
@@ -10,12 +14,75 @@
 </div>
 
 <div class="row">
-  <div class="small-4 large-expand columns">
-    <h2>Dropdown Menu</h2>
-    <button class="button" data-toggle="example-dropdown">Hover to Show Dropdown</button>
-    {{#zf-dropdown id="example-dropdown" hover=true hoverDelay=0 hoverPane=true closeOnClick=true}}
-      Example form in a dropdown.
-      {{#dropdown-menu class="vertical" closingTime=0 disableHover=true}}
+  <div class="small-6 large-expand columns">
+    <h2> Vanilla Dropdown Menu</h2>
+    <button class="button" data-toggle="vanilla-dropdown">Hover to Show Dropdown</button>
+    {{#zf-dropdown id="vanilla-dropdown" hover=true hoverDelay=0 hoverPane=true closeOnClick=true}}
+      {{#zf-dropdown-menu
+        class="vertical"
+        closingTime=0
+      }}
+        <li>
+          <a href="#">Item 1</a>
+          <ul class="menu">
+            <li><a href="#">Item 1A</a></li>
+            <li><a href="#">Item 1B</a></li>
+            <li><a href="#">Item 1C</a></li>
+            <li><a href="#">Item 1D</a></li>
+            <li><a href="#">Item 1E</a></li>
+            <li><a href="#">Item 1F</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#">Item 2</a>
+          <ul class="menu">
+            <li><a href="#">Item 2A</a></li>
+            <li><a href="#">Item 2B</a></li>
+            <li><a href="#">Item 2C</a></li>
+            <li><a href="#">Item 2D</a></li>
+            <li><a href="#">Item 2E</a></li>
+            <li><a href="#">Item 2F</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#">Item 3</a>
+          <ul class="menu">
+            <li><a href="#">Item 3A</a></li>
+            <li><a href="#">Item 3B</a></li>
+            <li><a href="#">Item 3C</a></li>
+            <li><a href="#">Item 3D</a></li>
+            <li><a href="#">Item 3E</a></li>
+            <li><a href="#">Item 3F</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#">Item 4</a>
+          <ul class="menu">
+            <li><a href="#">Item 4A</a></li>
+            <li><a href="#">Item 4B</a></li>
+            <li><a href="#">Item 4C</a></li>
+            <li><a href="#">Item 4D</a></li>
+            <li><a href="#">Item 4E</a></li>
+            <li><a href="#">Item 4F</a></li>
+          </ul>
+        </li>
+      {{/zf-dropdown-menu}}
+    {{/zf-dropdown}}
+  </div>
+
+  <div class="small-6 large-expand columns">
+    <h2>Aimable Dropdown Menu</h2>
+    <button class="button" data-toggle="aimable-dropdown">Hover to Show Dropdown</button>
+    {{#zf-dropdown id="aimable-dropdown" hover=true hoverDelay=0 hoverPane=true closeOnClick=true}}
+      {{#dropdown-menu
+        class="vertical"
+        closingTime=0
+        disableHover=true
+        anchorSelector='>li'
+        targetSubElementSelector='.submenu.is-dropdown-submenu'
+        targetElementDirection='right'
+        aimTolerance=50
+      }}
         <li>
           <a href="#">Item 1</a>
           <ul class="menu">

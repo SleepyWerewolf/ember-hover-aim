@@ -1,9 +1,23 @@
 @import 'foundation';
 @include foundation-everything;
 
-.test-dropdown-menu {
+.dropdown {
   li:hover {
     background: #ddd;
+  }
+
+  &::after {
+    content: '';
+    width: 90%;
+    height: 200px;
+    display: none;
+    position: absolute;
+  }
+
+  &.show-invisible-extension {
+    &::after {
+      display: block;
+    }
   }
 }
 

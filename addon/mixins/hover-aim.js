@@ -26,6 +26,9 @@ export default Mixin.create({
   targetSubElementSelector: null,
   targetElementDirection: null,
 
+  activateElement: Ember.K,
+  deactivateElement: Ember.K,
+
   init(...args) {
     this._super(args);
 
@@ -70,20 +73,22 @@ export default Mixin.create({
       this.activateElement(eventTarget);
     }
 
+    this.updateCurrentElementMouseMoveListener(event.relatedTarget);
+
     this.$(eventTarget).on('mousemove', this.onMouseMove);
   },
 
   onMouseLeave(event) {
     const eventTarget = event.delegateTarget || event.currentTarget;
+    const currentElement = get(this, 'element');
 
     this.$(eventTarget).off('mousemove', this.onMouseMove);
 
     if (!get(this, 'isMovingTowardsTarget')) {
-      if (this.deactivateElement) {
-        this.deactivateElement(eventTarget);
-      }
-
+      this.deactivateElement(eventTarget);
       set(this, 'hoverAim.activeElement', eventTarget);
+    } else if (event.toElement === currentElement) {
+      this.$(currentElement).on('mousemove', this.onMouseMove);
     }
   },
 
@@ -97,13 +102,20 @@ export default Mixin.create({
       const eventTarget = event.delegateTarget || event.currentTarget;
 
       if (eventTarget !== get(this, 'hoverAim.activeElement')) {
-        if (this.deactivateElement) {
-          this.deactivateElement(get(this, 'hoverAim.activeElement'));
-        }
-
+        this.deactivateElement(get(this, 'hoverAim.activeElement'));
         set(this, 'hoverAim.activeElement', eventTarget);
         this.activateElement(eventTarget);
+        this.updateCurrentElementMouseMoveListener(eventTarget);
       }
+    }
+  },
+
+  updateCurrentElementMouseMoveListener(eventTarget) {
+    const currentElement = get(this, 'element');
+
+    if (eventTarget === currentElement) {
+      console.log('\n\n\nRemoving mouse event listener\n\n\n');
+      this.$(currentElement).off('mousemove', this.onMouseMove);
     }
   },
 
@@ -165,6 +177,12 @@ export default Mixin.create({
         const aimTolerance = get(this, 'aimTolerance');
 
         return yInterceptOfTarget >= primaryCorner.y - aimTolerance && yInterceptOfTarget <= secondaryCorner.y + aimTolerance;
+        // if (yInterceptOfTarget >= primaryCorner.y - aimTolerance && yInterceptOfTarget <= secondaryCorner.y + aimTolerance) {
+        //   return true;
+        // } else {
+        //   console.log(`\n\n\nY Intercept: ${yInterceptOfTarget}\nPrimary Corner Y: ${primaryCorner.y - aimTolerance}\nSecondary Corner Y: ${secondaryCorner.y + aimTolerance}\nPrevious Mouse Location: ${previousMouseLocation.y}\nCurrentMouse Location: ${currentMouseLocation.y}\nSlope: ${slopeOfMouseMovement}\n\n\n`);
+        //   return false;
+        // }
       }
     }).volatile(),
 
