@@ -40,10 +40,10 @@ export default Mixin.create({
   didInsertElement(...args) {
     this._super(args);
 
-    const anchors = this.$(get(this, 'anchorSelector'));
+    const anchors = Ember.A(this.$(get(this, 'anchorSelector')).toArray());
 
     set(this, 'anchors', anchors);
-    anchors.each((index, item) => {
+    anchors.forEach((item, index) => {
       const $item = this.$(item);
 
       $item.on('mouseenter', this.onMouseEnter);
@@ -104,7 +104,11 @@ export default Mixin.create({
       if (eventTarget !== get(this, 'hoverAim.activeElement')) {
         this.deactivateElement(get(this, 'hoverAim.activeElement'));
         set(this, 'hoverAim.activeElement', eventTarget);
-        this.activateElement(eventTarget);
+
+        if (get(this, 'anchors').contains(eventTarget)) {
+          this.activateElement(eventTarget);
+        }
+
         this.updateCurrentElementMouseMoveListener(eventTarget);
       }
     }
