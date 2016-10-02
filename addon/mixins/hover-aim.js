@@ -135,16 +135,16 @@ export default Mixin.create({
 
     switch (get(this, 'targetElementDirection')) {
       case 'left':
-        primaryCorner = lowerLeft;
-        secondaryCorner = upperLeft;
+        primaryCorner = upperRight;
+        secondaryCorner = lowerRight;
         break;
       case 'bottom':
-        primaryCorner = lowerRight;
-        secondaryCorner = lowerLeft;
+        primaryCorner = upperRight;
+        secondaryCorner = upperLeft;
         break;
       case 'top':
-        primaryCorner = upperLeft;
-        secondaryCorner = upperRight;
+        primaryCorner = lowerLeft;
+        secondaryCorner = lowerRight;
         break;
       default:
         primaryCorner = upperLeft;
@@ -160,6 +160,7 @@ export default Mixin.create({
     '$targetElement',
     'targetElementDirection',
     'hoverAim.activeElement',
+    'aimtolerance',
     function () {
       const { mouseLocations } = this.get('hoverAim');
 
@@ -177,18 +178,28 @@ export default Mixin.create({
 
       if (distanceToPrimaryCorner < previousDistanceToPrimaryCorner || distanceToSecondaryCorner < previousDistanceToSecondaryCorner) {
         const slopeOfMouseMovement = getSlope(previousMouseLocation, currentMouseLocation);
-        const yInterceptOfTarget = slopeOfMouseMovement * (primaryCorner.x - currentMouseLocation.x) + currentMouseLocation.y;
         const aimTolerance = get(this, 'aimTolerance');
+        const targetElementDirection = get(this, 'targetElementDirection');
+        const interceptOfTarget = this.getIntercept(targetElementDirection, primaryCorner, slopeOfMouseMovement, currentMouseLocation);
 
-        return yInterceptOfTarget >= primaryCorner.y - aimTolerance && yInterceptOfTarget <= secondaryCorner.y + aimTolerance;
-        // if (yInterceptOfTarget >= primaryCorner.y - aimTolerance && yInterceptOfTarget <= secondaryCorner.y + aimTolerance) {
-        //   return true;
-        // } else {
-        //   console.log(`\n\n\nY Intercept: ${yInterceptOfTarget}\nPrimary Corner Y: ${primaryCorner.y - aimTolerance}\nSecondary Corner Y: ${secondaryCorner.y + aimTolerance}\nPrevious Mouse Location: ${previousMouseLocation.y}\nCurrentMouse Location: ${currentMouseLocation.y}\nSlope: ${slopeOfMouseMovement}\n\n\n`);
-        //   return false;
-        // }
+        if (targetElementDirection === 'top' || targetElementDirection === 'bottom') {
+          return interceptOfTarget >= primaryCorner.x - aimTolerance && interceptOfTarget <= secondaryCorner.x + aimTolerance;
+        } else {
+          return interceptOfTarget >= primaryCorner.y - aimTolerance && interceptOfTarget <= secondaryCorner.y + aimTolerance;
+        }
       }
     }).volatile(),
+
+  getIntercept(targetElementDirection, target, slope, mouseLocation) {
+    let intercept;
+    if (targetElementDirection === 'top' || targetElementDirection === 'bottom') {
+      intercept = (target.y - mouseLocation.y) / slope + mouseLocation.x;
+    } else {
+      intercept = slope * (target.x - mouseLocation.x) + mouseLocation.y;
+    }
+
+    return intercept;
+  },
 
   targetElementOffsets: computed('targetSubElementSelector', function () {
     const { activeElement } = get(this, 'hoverAim');
