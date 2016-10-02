@@ -143,16 +143,20 @@
       {{/zf-tooltip}}.
     </p>
     <p>
-      This is an
+      This is an aimable tooltip:
       {{#aimable-tooltip
         title="Ahh much easier"
         positionClass="top"
-        anchorSelector='>li'
-        targetSubElementSelector='.submenu.is-dropdown-submenu'
-        targetElementDirection='right'
-        aimTolerance=100
+        templateClasses="aimable-tooltip-target"
+        disableHover=true
+        anchorSelector=".aimable-tooltip-anchor"
+        targetSubElementSelector=".aimable-tooltip-target"
+        targetElementDirection="top"
+        aimTolerance=50
       }}
-        aimable tooltip
+        <span class="aimable-tooltip-anchor">
+          <img src="/assets/images/help_icon.jpg"/>
+        </span>
       {{/aimable-tooltip}}.
     </p>
   </div>

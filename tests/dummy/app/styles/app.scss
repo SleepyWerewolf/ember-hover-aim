@@ -26,3 +26,22 @@
     display: block;
   }
 }
+
+.aimable-tooltip {
+  .aimable-tooltip-anchor {
+    img {
+      width: 20px;
+    }
+  }
+
+  &.show-invisible-extension {
+    &::before {
+      content: '';
+      width: 119px;
+      height: 26px;
+      position: absolute;
+      right: -50px;
+      bottom: 10px;
+    }
+  }
+}

@@ -99,6 +99,7 @@ export default Mixin.create({
     });
 
     if (!get(this, 'isMovingTowardsTarget')) {
+      console.log('\n\nNot moving towards target\n\n');
       const eventTarget = event.delegateTarget || event.currentTarget;
 
       if (eventTarget !== get(this, 'hoverAim.activeElement')) {
@@ -111,6 +112,8 @@ export default Mixin.create({
 
         this.updateCurrentElementMouseMoveListener(eventTarget);
       }
+    } else {
+      console.log('\n\nMoving towards target\n\n');
     }
   },
 
@@ -201,10 +204,11 @@ export default Mixin.create({
     return intercept;
   },
 
-  targetElementOffsets: computed('targetSubElementSelector', function () {
+  targetElementOffsets: computed('hoverAim.activeElement', 'targetSubElementSelector', function () {
     const { activeElement } = get(this, 'hoverAim');
     const targetSubElementSelector = get(this, 'targetSubElementSelector');
-    const targetSubElement = Ember.$(activeElement).find(targetSubElementSelector);
+    const potentialSubElement = Ember.$(activeElement).find(targetSubElementSelector);
+    const targetSubElement = Ember.isPresent(potentialSubElement) ? potentialSubElement : Ember.$(targetSubElementSelector);
     const targetSubElementOffset = targetSubElement.offset();
     const upperLeft = {
       x: targetSubElementOffset.left,
