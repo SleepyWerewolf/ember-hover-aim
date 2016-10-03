@@ -1,4 +1,4 @@
-<a href="https://github.com/SleepyWerewolf/ember-hover-aim">
+<a href="https://github.com/SleepyWerewolf/ember-hover-aim" target="blank">
   <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png">
 </a>
 
@@ -134,28 +134,33 @@
   <div class="small-8 large-expand columns">
     <h2>Tooltip</h2>
     <p>
-      This is a
+      Traditionally most tooltips don't let/need the user to be able to hover over them:
       {{#zf-tooltip
         title="Good luck hovering over me."
         positionClass="top"
+        hoverDelay=0
+        fadeInDuration=0
+        fadeOutDuration=0
       }}
-        regular tooltip
-      {{/zf-tooltip}}.
+        <img src="assets/images/help_icon.jpg" class="help-icon"/>
+      {{/zf-tooltip}}
     </p>
     <p>
-      This is an aimable tooltip:
+      However, in scenarios where the user <em>should</em> be able to hover over a tooltip, <b>ember-hover-aim</b> makes it very easy to modify your tooltip element:
       {{#aimable-tooltip
-        title="Ahh much easier"
+        title="Much easier isn't it?"
         positionClass="top"
         templateClasses="aimable-tooltip-target"
         disableHover=true
+        fadeInDuration=0
+        fadeOutDuration=0
         anchorSelector=".aimable-tooltip-anchor"
         targetSubElementSelector=".aimable-tooltip-target"
         targetElementDirection="top"
         aimTolerance=50
       }}
         <span class="aimable-tooltip-anchor">
-          <img src="/assets/images/help_icon.jpg"/>
+          <img src="assets/images/help_icon.jpg" class="help-icon"/>
         </span>
       {{/aimable-tooltip}}.
     </p>

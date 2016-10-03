@@ -28,12 +28,6 @@
 }
 
 .aimable-tooltip {
-  .aimable-tooltip-anchor {
-    img {
-      width: 20px;
-    }
-  }
-
   &.show-invisible-extension {
     &::before {
       content: '';
@@ -44,4 +38,8 @@
       bottom: 10px;
     }
   }
+}
+
+img.help-icon {
+  width: 20px;
 }
